@@ -380,6 +380,13 @@ class CI_Image_lib {
 	public $wm_use_truetype	= FALSE;
 
 	/**
+	 * Whether the quality was set in the config
+	 *
+	 * @var bool
+	 */
+	public $is_quality_cfg_set = FALSE;
+
+	/**
 	 * Initialize Image Library
 	 *
 	 * @param	array	$props
@@ -491,6 +498,10 @@ class CI_Image_lib {
 					elseif (in_array($key, array('width', 'height'), TRUE) && ! ctype_digit((string) $val))
 					{
 						continue;
+					}
+					if (in_array($key, array('quality')))
+					{
+						$this->is_quality_cfg_set = TRUE;
 					}
 
 					$this->$key = $val;
@@ -753,9 +764,13 @@ class CI_Image_lib {
 	{
 		$v2_override = FALSE;
 
-		// If the target width/height match the source, AND if the new file name is not equal to the old file name
-		// we'll simply make a copy of the original with the new name... assuming dynamic rendering is off.
-		if ($this->dynamic_output === FALSE && $this->orig_width === $this->width && $this->orig_height === $this->height)
+		// If the target width/height match the source, AND if the new file name is not
+		// equal to the old file name and the quality was not set in the config we'll simply
+		// make a copy of the original with the new name... assuming dynamic rendering is off.
+		if ($this->dynamic_output === FALSE
+			&& $this->orig_width === $this->width
+			&& $this->orig_height === $this->height
+			&& $this->is_quality_cfg_set === FALSE)
 		{
 			if ($this->source_image !== $this->new_image && @copy($this->full_src_path, $this->full_dst_path))
 			{
