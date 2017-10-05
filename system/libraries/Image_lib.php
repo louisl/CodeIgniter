@@ -499,10 +499,8 @@ class CI_Image_lib {
 					{
 						continue;
 					}
-					if (in_array($key, array('quality')))
-					{
-						$this->is_quality_cfg_set = TRUE;
-					}
+
+					$this->is_quality_cfg_set = in_array($key, array('quality')) ? TRUE : FALSE;
 
 					$this->$key = $val;
 				}
@@ -764,13 +762,10 @@ class CI_Image_lib {
 	{
 		$v2_override = FALSE;
 
-		// If the target width/height match the source, AND if the new file name is not
-		// equal to the old file name and the quality was not set in the config we'll simply
-		// make a copy of the original with the new name... assuming dynamic rendering is off.
-		if ($this->dynamic_output === FALSE
-			&& $this->orig_width === $this->width
-			&& $this->orig_height === $this->height
-			&& $this->is_quality_cfg_set === FALSE)
+		// If the target width/height match the source, AND if the new file name is not equal to the old file name
+		// and the quality was not set in the config
+		// we'll simply make a copy of the original with the new name... assuming dynamic rendering is off.
+		if ($this->dynamic_output === FALSE && $this->orig_width === $this->width && $this->orig_height === $this->height && $this->is_quality_cfg_set === FALSE)
 		{
 			if ($this->source_image !== $this->new_image && @copy($this->full_src_path, $this->full_dst_path))
 			{
@@ -987,7 +982,7 @@ class CI_Image_lib {
 			$cmd_inner = 'pnmscale -xysize '.$this->width.' '.$this->height;
 		}
 
-		$cmd = $this->library_path.$cmd_in.' '.$this->full_src_path.' | '.$cmd_inner.' | '.$cmd_out.' > '.$this->dest_folder.'netpbm.tmp';
+		$cmd = $this->library_path.$cmd_in.' '.escapeshellarg($this->full_src_path).' | '.$cmd_inner.' | '.$cmd_out.' > '.$this->dest_folder.'netpbm.tmp';
 
 		$retval = 1;
 		// exec() might be disabled
@@ -1219,7 +1214,7 @@ class CI_Image_lib {
 		}
 
 		// Build the finalized image
-		if ($wm_img_type === 3)
+		if ($wm_img_type === 3 && function_exists('imagealphablending'))
 		{
 			@imagealphablending($src_img, TRUE);
 		}
